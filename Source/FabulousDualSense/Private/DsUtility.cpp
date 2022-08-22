@@ -37,7 +37,7 @@ const TMap<FGamepadKeyNames::Type, uint32>& DsConstants::GetRegularButtons()
 
 constexpr const TCHAR* DsUtility::ReturnValueToString(const DS5W_ReturnValue ReturnValue)
 {
-	if (ReturnValue <= DS5W_ReturnValue::OK || ReturnValue > DS5W_ReturnValue::E_IO_PENDING)
+	if (ReturnValue < DS5W_ReturnValue::OK || ReturnValue > DS5W_ReturnValue::E_IO_PENDING)
 	{
 		return TEXT("Unknown return value");
 	}
@@ -64,7 +64,7 @@ constexpr const TCHAR* DsUtility::ReturnValueToString(const DS5W_ReturnValue Ret
 
 constexpr const TCHAR* DsUtility::DeviceConnectionToString(const DS5W::DeviceConnection DeviceConnection)
 {
-	if (DeviceConnection <= DS5W::DeviceConnection::USB || DeviceConnection > DS5W::DeviceConnection::BT)
+	if (DeviceConnection < DS5W::DeviceConnection::USB || DeviceConnection > DS5W::DeviceConnection::BT)
 	{
 		return TEXT("Unknown device connection");
 	}
