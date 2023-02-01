@@ -38,7 +38,7 @@ private:
 	FDsExtraState ExtraStates[DsConstants::MaxDevices]{};
 
 public:
-	FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
+	explicit FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
 
 	virtual ~FDsInputDevice() override;
 
@@ -46,7 +46,7 @@ public:
 
 	virtual void SendControllerEvents() override;
 
-	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
+	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& NewMessageHandler) override;
 
 	virtual bool Exec(UWorld* World, const TCHAR* Command, FOutputDevice& Archive) override;
 
@@ -68,6 +68,8 @@ private:
 
 	void ProcessTouch(int32 ControllerId, const FGamepadKeyNames::Type& AxisXKeyName, const FGamepadKeyNames::Type& AxisYKeyName,
 	                  const DS5W::Touch& PreviousTouch, const DS5W::Touch& NewTouch) const;
+
+	void ReleaseStick(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, int8 CurrentValue) const;
 
 	void ReleaseButton(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, bool bPressed) const;
 };

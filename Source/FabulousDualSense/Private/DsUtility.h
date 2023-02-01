@@ -14,7 +14,8 @@ namespace DsConstants
 {
 	static constexpr auto MaxDevices{4};
 	static constexpr auto ButtonsCount{29};
-	static constexpr auto VirtualStickButtonDeadZone{30};
+	static constexpr auto StickDeadZone{30};
+	static constexpr auto TriggerDeadZone{30};
 
 	static const FKey TouchpadKey{TEXT("DsTouchpad")};
 	static const FKey LogoKey{TEXT("DsLogo")};
