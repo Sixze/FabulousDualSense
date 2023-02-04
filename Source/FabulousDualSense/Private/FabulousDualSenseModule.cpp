@@ -1,7 +1,6 @@
 ﻿#include "FabulousDualSenseModule.h"
 
 #include "DsInputDevice.h"
-#include "DsUtility.h"
 
 IMPLEMENT_MODULE(FFabulousDualSenseModule, FabulousDualSense)
 

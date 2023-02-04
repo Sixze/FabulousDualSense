@@ -1,6 +1,8 @@
 #pragma once
 
-#include "DsUtility.h"
+#include <DualSenseWindows.h>
+
+#include "DsConstants.h"
 #include "IInputDevice.h"
 
 class UDsSettings;
@@ -38,7 +40,7 @@ private:
 	FDsExtraState ExtraStates[DsConstants::MaxDevices]{};
 
 public:
-	explicit FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
+	explicit FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler);
 
 	virtual ~FDsInputDevice() override;
 
