@@ -1,5 +1,7 @@
 #include "DsSettings.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(DsSettings)
+
 #define LOCTEXT_NAMESPACE "DsSettings"
 
 UDsSettings::UDsSettings()

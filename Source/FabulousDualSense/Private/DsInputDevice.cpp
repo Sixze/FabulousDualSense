@@ -5,7 +5,6 @@
 #include "Framework/Application/SlateApplication.h"
 #include "GenericPlatform/IInputInterface.h"
 #include "Misc/ConfigCacheIni.h"
-#include "Misc/CoreDelegates.h"
 
 FDsInputDevice::FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler) : MessageHandler{MessageHandler}
 {
