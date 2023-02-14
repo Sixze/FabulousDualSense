@@ -61,17 +61,21 @@ public:
 private:
 	void RefreshDevices();
 
-	void DisconnectDevice(int32 ControllerId);
+	void DisconnectDevice(IPlatformInputDeviceMapper& InputDeviceMapper, int32 ControllerId,
+	                      FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
 
-	void ProcessStick(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, int8 PreviousValue, int8 NewValue) const;
+	void ProcessStick(FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId,
+	                  const FGamepadKeyNames::Type& KeyName, int8 PreviousValue, int8 NewValue) const;
 
-	void ProcessButton(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, int32 ButtonIndex,
-	                   bool bPreviousKeyDown, bool bNewKeyDown, double Time);
+	void ProcessButton(int32 ControllerId, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId,
+	                   const FGamepadKeyNames::Type& KeyName, int32 ButtonIndex, bool bPreviousKeyDown, bool bNewKeyDown, double Time);
 
-	void ProcessTouch(int32 ControllerId, const FGamepadKeyNames::Type& AxisXKeyName, const FGamepadKeyNames::Type& AxisYKeyName,
-	                  const DS5W::Touch& PreviousTouch, const DS5W::Touch& NewTouch) const;
+	void ProcessTouch(FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId, const FGamepadKeyNames::Type& AxisXKeyName,
+	                  const FGamepadKeyNames::Type& AxisYKeyName, const DS5W::Touch& PreviousTouch, const DS5W::Touch& NewTouch) const;
 
-	void ReleaseStick(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, int8 CurrentValue) const;
+	void ReleaseStick(FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId,
+	                  const FGamepadKeyNames::Type& KeyName, int8 CurrentValue) const;
 
-	void ReleaseButton(int32 ControllerId, const FGamepadKeyNames::Type& KeyName, bool bPressed) const;
+	void ReleaseButton(FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId,
+	                   const FGamepadKeyNames::Type& KeyName, bool bPressed) const;
 };
