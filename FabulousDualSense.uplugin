@@ -23,7 +23,7 @@
 		{
 			"Name": "FabulousDualSense",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
+			"LoadingPhase": "PreDefault",
 			"PlatformAllowList": [
 				"Win64"
 			]
