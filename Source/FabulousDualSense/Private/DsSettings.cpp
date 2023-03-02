@@ -6,7 +6,7 @@
 
 UDsSettings::UDsSettings()
 {
-	CategoryName = TEXT("Plugins");
+	CategoryName = FName{TEXTVIEW("Plugins")};
 }
 
 #if WITH_EDITOR

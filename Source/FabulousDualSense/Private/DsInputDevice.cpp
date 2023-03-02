@@ -52,7 +52,7 @@ void FDsInputDevice::SendControllerEvents()
 		}
 
 		// ReSharper disable once CppLocalVariableWithNonTrivialDtorIsNeverUsed
-		FInputDeviceScope InputDeviceScope{this, DS_GET_TYPE_STRING(FDsInputDevice), ControllerId, TEXT("DualSense")};
+		FInputDeviceScope InputDeviceScope{this, DsConstants::InputDeviceName, ControllerId, DsConstants::HardwareDeviceIdentifier};
 
 		auto PlatformUserId{PLATFORMUSERID_NONE};
 		auto InputDeviceId{INPUTDEVICEID_NONE};
@@ -68,7 +68,7 @@ void FDsInputDevice::SendControllerEvents()
 		if (DS5W_FAILED(ReadInputResult))
 		{
 			UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to read device input state: %s, Device: %s."),
-			       DsUtility::ReturnValueToString(ReadInputResult), Context._internal.devicePath);
+			       DsUtility::ReturnValueToString(ReadInputResult).GetData(), Context._internal.devicePath);
 
 			DisconnectDevice(InputDeviceMapper, ControllerId, PlatformUserId, InputDeviceId);
 			continue;
@@ -175,7 +175,7 @@ void FDsInputDevice::SendControllerEvents()
 			if (DS5W_FAILED(WriteOutputResult))
 			{
 				UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to write device output state: %s, Device: %s."),
-				       DsUtility::ReturnValueToString(ReadInputResult), Context._internal.devicePath);
+				       DsUtility::ReturnValueToString(ReadInputResult).GetData(), Context._internal.devicePath);
 
 				DisconnectDevice(InputDeviceMapper, ControllerId, PlatformUserId, InputDeviceId);
 			}
@@ -282,7 +282,7 @@ void FDsInputDevice::RefreshDevices()
 
 		default:
 			UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to enumerate devices: %s."),
-			       DsUtility::ReturnValueToString(EnumDevicesResult));
+			       DsUtility::ReturnValueToString(EnumDevicesResult).GetData());
 			return;
 	}
 
@@ -309,7 +309,7 @@ void FDsInputDevice::RefreshDevices()
 		}
 
 		UE_LOG(LogFabulousDualSense, Log, TEXT("New device found: %s, Connection: %s."),
-		       DeviceInfos[i]._internal.path, DsUtility::DeviceConnectionToString(DeviceInfos[i]._internal.connection));
+		       DeviceInfos[i]._internal.path, DsUtility::DeviceConnectionToString(DeviceInfos[i]._internal.connection).GetData());
 
 		const auto InitializeDeviceContextResult{initDeviceContext(&DeviceInfos[i], &DeviceContexts[FreeIndex])};
 		if (DS5W_SUCCESS(InitializeDeviceContextResult))
@@ -329,7 +329,7 @@ void FDsInputDevice::RefreshDevices()
 		else
 		{
 			UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to initialize device context: %s, Device: %s."),
-			       DsUtility::ReturnValueToString(InitializeDeviceContextResult), DeviceInfos[i]._internal.path);
+			       DsUtility::ReturnValueToString(InitializeDeviceContextResult).GetData(), DeviceInfos[i]._internal.path);
 
 			FMemory::Memzero(DeviceContexts[FreeIndex]);
 		}
