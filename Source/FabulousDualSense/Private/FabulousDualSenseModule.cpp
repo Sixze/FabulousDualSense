@@ -10,9 +10,9 @@ void FFabulousDualSenseModule::StartupModule()
 {
 	IInputDeviceModule::StartupModule();
 
-	static const FName CategoryName{TEXT("DualSense")};
+	static const FName CategoryName{TEXTVIEW("DualSense")};
 
-	EKeys::AddMenuCategoryDisplayInfo(CategoryName, LOCTEXT("Category", "DualSense"), TEXT("GraphEditor.PadEvent_16x"));
+	EKeys::AddMenuCategoryDisplayInfo(CategoryName, LOCTEXT("Category", "DualSense"), FName{TEXTVIEW("GraphEditor.PadEvent_16x")});
 
 	EKeys::AddKey({DsConstants::TouchpadKey, LOCTEXT("TouchpadKey", "DualSense Touchpad"), FKeyDetails::GamepadKey, CategoryName});
 	EKeys::AddKey({DsConstants::LogoKey, LOCTEXT("LogoKey", "DualSense Logo"), FKeyDetails::GamepadKey, CategoryName});
@@ -57,8 +57,7 @@ void FFabulousDualSenseModule::StartupModule()
 	                    }, DsConstants::Touch2AxisXKey, DsConstants::Touch2AxisYKey);
 }
 
-TSharedPtr<IInputDevice> FFabulousDualSenseModule::CreateInputDevice(
-	const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler)
+TSharedPtr<IInputDevice> FFabulousDualSenseModule::CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler)
 {
 	return MakeShared<FDsInputDevice>(MessageHandler);
 }

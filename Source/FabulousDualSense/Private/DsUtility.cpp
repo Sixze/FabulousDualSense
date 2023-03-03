@@ -2,44 +2,44 @@
 
 DEFINE_LOG_CATEGORY(LogFabulousDualSense)
 
-constexpr const TCHAR* DsUtility::ReturnValueToString(const DS5W_ReturnValue ReturnValue)
+constexpr FStringView DsUtility::ReturnValueToString(const DS5W_ReturnValue ReturnValue)
 {
 	if (ReturnValue < DS5W_ReturnValue::OK || ReturnValue > DS5W_ReturnValue::E_IO_PENDING)
 	{
-		return TEXT("Unknown return value");
+		return TEXTVIEW("Unknown return value");
 	}
 
-	static const TCHAR* Strings[]
+	static constexpr FStringView Strings[]
 	{
-		TEXT("Operation completed without an error"),
-		TEXT("Operation encountered an unknown error"),
-		TEXT("The user supplied buffer is too small"),
-		TEXT("External unexpected WinAPI error"),
-		TEXT("Not enough memory on the stack"),
-		TEXT("Invalid arguments"),
-		TEXT("This feature is currently not supported"),
-		TEXT("Device was disconnected"),
-		TEXT("Bluetooth communication error"),
-		TEXT("IO timeout"),
-		TEXT("IO failed"),
-		TEXT("Overlapped IO request was not found"),
-		TEXT("IO did not complete because it is running in the background"),
+		TEXTVIEW("Operation completed without an error"),
+		TEXTVIEW("Operation encountered an unknown error"),
+		TEXTVIEW("The user supplied buffer is too small"),
+		TEXTVIEW("External unexpected WinAPI error"),
+		TEXTVIEW("Not enough memory on the stack"),
+		TEXTVIEW("Invalid arguments"),
+		TEXTVIEW("This feature is currently not supported"),
+		TEXTVIEW("Device was disconnected"),
+		TEXTVIEW("Bluetooth communication error"),
+		TEXTVIEW("IO timeout"),
+		TEXTVIEW("IO failed"),
+		TEXTVIEW("Overlapped IO request was not found"),
+		TEXTVIEW("IO did not complete because it is running in the background"),
 	};
 
 	return Strings[static_cast<uint32>(ReturnValue)];
 }
 
-constexpr const TCHAR* DsUtility::DeviceConnectionToString(const DS5W::DeviceConnection DeviceConnection)
+constexpr FStringView DsUtility::DeviceConnectionToString(const DS5W::DeviceConnection DeviceConnection)
 {
 	if (DeviceConnection < DS5W::DeviceConnection::USB || DeviceConnection > DS5W::DeviceConnection::BT)
 	{
-		return TEXT("Unknown device connection");
+		return TEXTVIEW("Unknown device connection");
 	}
 
-	static const TCHAR* Strings[]
+	static constexpr FStringView Strings[]
 	{
-		TEXT("USB"),
-		TEXT("Bluetooth")
+		TEXTVIEW("USB"),
+		TEXTVIEW("Bluetooth")
 	};
 
 	return Strings[static_cast<uint8>(DeviceConnection)];
