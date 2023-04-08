@@ -51,7 +51,6 @@ void FDsInputDevice::SendControllerEvents()
 			continue;
 		}
 
-		// ReSharper disable once CppLocalVariableWithNonTrivialDtorIsNeverUsed
 		FInputDeviceScope InputDeviceScope{this, DsConstants::InputDeviceName, ControllerId, DsConstants::HardwareDeviceIdentifier};
 
 		auto PlatformUserId{PLATFORMUSERID_NONE};
