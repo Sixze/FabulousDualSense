@@ -6,7 +6,7 @@ public class DualSenseWindows : ModuleRules
 	public DualSenseWindows(ReadOnlyTargetRules Target) : base(Target)
 	{
 		Type = ModuleType.External;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_2;
 
 		bEnableNonInlinedGenCppWarnings = true;
 
