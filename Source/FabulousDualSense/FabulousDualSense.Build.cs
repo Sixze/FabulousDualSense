@@ -11,8 +11,8 @@ public class FabulousDualSense : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "ApplicationCore", "InputCore", "InputDevice",
-			"SlateCore", "Slate", "DeveloperSettings", "DualSenseWindows"
+			"Core", "CoreUObject", "Engine", "ApplicationCore", "InputCore",
+			"InputDevice", "SlateCore", "Slate", "DeveloperSettings", "DualSenseWindows"
 		});
 	}
 }
