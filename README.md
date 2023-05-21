@@ -1,8 +1,10 @@
 # Fabulous DualSense
 
-Minimal input device plugin for **DualSense** controller in **Windows** for **Unreal Engine**.
+Input device plugin for **DualSense** controller in **Windows** for **Unreal Engine**.
 
-This plugin includes generic gamepad and touchpad functionality and is intended to be used during development only.
+This plugin includes generic gamepad and touchpad functionality, as well as partial support for the [Device Properties](https://docs.unrealengine.com/en-US/device-properties-in-unreal-engine/) feature (supported device properties are **Device Color**, **Trigger Feedback**, and **Trigger Resistance**).
+
+**This plugin is intended to be used during development only.**
 
 ## Quick Start
 
