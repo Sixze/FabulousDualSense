@@ -8,7 +8,7 @@ namespace DsConstants
 	inline static const FName InputDeviceName{TEXTVIEW("DsInputDevice")};
 	inline static const FString HardwareDeviceIdentifier{TEXTVIEW("DualSense")};
 
-	inline static constexpr auto MaxDevices{4};
+	inline static constexpr auto MaxDevicesCount{4};
 	inline static constexpr auto ButtonsCount{29};
 	inline static constexpr auto StickDeadZone{30};
 	inline static constexpr auto TriggerDeadZone{30};

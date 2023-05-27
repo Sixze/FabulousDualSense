@@ -2,6 +2,7 @@
 
 #include "DsSettings.h"
 #include "DsUtility.h"
+#include "Containers/StaticBitArray.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GenericPlatform/IInputInterface.h"
 #include "Misc/ConfigCacheIni.h"
@@ -20,7 +21,7 @@ FDsInputDevice::~FDsInputDevice()
 {
 	auto& InputDeviceMapper{IPlatformInputDeviceMapper::Get()};
 
-	for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevices; ControllerId++)
+	for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevicesCount; ControllerId++)
 	{
 		if (DeviceContexts[ControllerId]._internal.connected)
 		{
@@ -44,7 +45,7 @@ void FDsInputDevice::SendControllerEvents()
 
 	auto& InputDeviceMapper{IPlatformInputDeviceMapper::Get()};
 
-	for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevices; ControllerId++)
+	for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevicesCount; ControllerId++)
 	{
 		if (!DeviceContexts[ControllerId]._internal.connected)
 		{
@@ -194,7 +195,7 @@ bool FDsInputDevice::Exec(UWorld* World, const TCHAR* Command, FOutputDevice& Ar
 
 void FDsInputDevice::SetChannelValue(const int32 ControllerId, const FForceFeedbackChannelType ChannelType, const float Value)
 {
-	if (ControllerId < 0 || ControllerId >= DsConstants::MaxDevices || !DeviceContexts[ControllerId]._internal.connected)
+	if (ControllerId < 0 || ControllerId >= DsConstants::MaxDevicesCount || !DeviceContexts[ControllerId]._internal.connected)
 	{
 		return;
 	}
@@ -233,7 +234,7 @@ void FDsInputDevice::SetChannelValue(const int32 ControllerId, const FForceFeedb
 
 void FDsInputDevice::SetChannelValues(const int32 ControllerId, const FForceFeedbackValues& Values)
 {
-	if (ControllerId < 0 || ControllerId >= DsConstants::MaxDevices || !DeviceContexts[ControllerId]._internal.connected)
+	if (ControllerId < 0 || ControllerId >= DsConstants::MaxDevicesCount || !DeviceContexts[ControllerId]._internal.connected)
 	{
 		return;
 	}
@@ -260,7 +261,7 @@ bool FDsInputDevice::IsGamepadAttached() const
 {
 	auto bResult{false};
 
-	for (auto i{0}; i < DsConstants::MaxDevices; i++)
+	for (auto i{0}; i < DsConstants::MaxDevicesCount; i++)
 	{
 		bResult |= DeviceContexts[i]._internal.connected;
 	}
@@ -270,13 +271,32 @@ bool FDsInputDevice::IsGamepadAttached() const
 
 void FDsInputDevice::RefreshDevices()
 {
-	static DS5W::DeviceEnumInfo DeviceInfos[DsConstants::MaxDevices];
-	uint32 DevicesCount{0};
+	static unsigned int KnownDeviceIds[DsConstants::MaxDevicesCount];
+	unsigned int KnowDevicesCount{0};
 
-	switch (const auto EnumDevicesResult{enumDevices(DeviceInfos, DsConstants::MaxDevices, &DevicesCount)})
+	for (auto i{0}; i < DsConstants::MaxDevicesCount; i++)
+	{
+		if (DeviceContexts[i]._internal.connected)
+		{
+			KnownDeviceIds[i] = DeviceContexts[i]._internal.uniqueID;
+			KnowDevicesCount += 1;
+		}
+	}
+
+	static DS5W::DeviceEnumInfo DeviceInfos[DsConstants::MaxDevicesCount];
+	unsigned int DevicesCount{0};
+
+	const auto EnumDevicesResult{
+		enumUnknownDevices(DeviceInfos, DsConstants::MaxDevicesCount, KnownDeviceIds, KnowDevicesCount, &DevicesCount)
+	};
+
+	switch (EnumDevicesResult)
 	{
 		case DS5W_OK:
+			break;
+
 		case DS5W_E_INSUFFICIENT_BUFFER:
+			DevicesCount = DsConstants::MaxDevicesCount;
 			break;
 
 		default:
@@ -286,52 +306,100 @@ void FDsInputDevice::RefreshDevices()
 	}
 
 	auto& InputDeviceMapper{IPlatformInputDeviceMapper::Get()};
+	TStaticBitArray<DsConstants::MaxDevicesCount> ProcessedDeviceIndexes;
 
-	for (uint32 i{0}; i < DevicesCount; i++)
+	// First iteration: process devices reconnection and already connected devices.
+
+	for (unsigned int DeviceIndex{0}; DeviceIndex < DevicesCount; DeviceIndex++)
 	{
-		auto bAlreadyConnected{false};
-		auto FreeIndex{-1};
-
-		for (auto j{0}; j < DsConstants::MaxDevices; j++)
+		for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevicesCount; ControllerId++)
 		{
-			bAlreadyConnected |= DeviceInfos[i]._internal.uniqueID == DeviceContexts[j]._internal.uniqueID;
-
-			if (FreeIndex < 0 && !DeviceContexts[j]._internal.connected)
+			if (DeviceContexts[ControllerId]._internal.uniqueID == DeviceInfos[DeviceIndex]._internal.uniqueID)
 			{
-				FreeIndex = j;
+				ProcessedDeviceIndexes[DeviceIndex] = true;
+
+				if (!DeviceContexts[ControllerId]._internal.connected)
+				{
+					ConnectDevice(InputDeviceMapper, DeviceInfos[DeviceIndex], ControllerId);
+				}
+
+				break;
 			}
 		}
+	}
 
-		if (bAlreadyConnected || FreeIndex < 0)
+	// Second iteration: process the connection of new devices (without reusing the
+	// IDs of disconnected devices to give them the opportunity to reconnect later).
+
+	for (unsigned int DeviceIndex{0}; DeviceIndex < DevicesCount; DeviceIndex++)
+	{
+		if (ProcessedDeviceIndexes[DeviceIndex])
 		{
 			continue;
 		}
 
-		UE_LOG(LogFabulousDualSense, Log, TEXT("New device found: %s, Connection: %s."),
-		       DeviceInfos[i]._internal.path, DsUtility::DeviceConnectionToString(DeviceInfos[i]._internal.connection).GetData());
-
-		const auto InitializeDeviceContextResult{initDeviceContext(&DeviceInfos[i], &DeviceContexts[FreeIndex])};
-		if (DS5W_SUCCESS(InitializeDeviceContextResult))
+		for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevicesCount; ControllerId++)
 		{
-			UE_LOG(LogFabulousDualSense, Log, TEXT("Device connected: %s."), DeviceInfos[i]._internal.path);
+			if (DeviceContexts[ControllerId]._internal.uniqueID == 0)
+			{
+				ProcessedDeviceIndexes[DeviceIndex] = true;
 
-			FMemory::Memzero(InputStates[FreeIndex]);
-			FMemory::Memzero(OutputStates[FreeIndex]);
-			FMemory::Memzero(ExtraStates[FreeIndex]);
-
-			auto PlatformUserId{PLATFORMUSERID_NONE};
-			auto InputDeviceId{INPUTDEVICEID_NONE};
-			InputDeviceMapper.RemapControllerIdToPlatformUserAndDevice(i, PlatformUserId, InputDeviceId);
-
-			InputDeviceMapper.Internal_MapInputDeviceToUser(InputDeviceId, PlatformUserId, EInputDeviceConnectionState::Connected);
+				ConnectDevice(InputDeviceMapper, DeviceInfos[DeviceIndex], ControllerId);
+				break;
+			}
 		}
-		else
+	}
+
+	// Third iteration: process the connection of new devices (reusing the IDs of
+	// disconnected devices, because there are not enough unused IDs for new devices).
+
+	for (unsigned int DeviceIndex{0}; DeviceIndex < DevicesCount; DeviceIndex++)
+	{
+		if (ProcessedDeviceIndexes[DeviceIndex])
 		{
-			UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to initialize device context: %s, Device: %s."),
-			       DsUtility::ReturnValueToString(InitializeDeviceContextResult).GetData(), DeviceInfos[i]._internal.path);
-
-			FMemory::Memzero(DeviceContexts[FreeIndex]);
+			continue;
 		}
+
+		for (auto ControllerId{0}; ControllerId < DsConstants::MaxDevicesCount; ControllerId++)
+		{
+			if (!DeviceContexts[ControllerId]._internal.connected)
+			{
+				ProcessedDeviceIndexes[DeviceIndex] = true;
+
+				ConnectDevice(InputDeviceMapper, DeviceInfos[DeviceIndex], ControllerId);
+				break;
+			}
+		}
+	}
+}
+
+void FDsInputDevice::ConnectDevice(IPlatformInputDeviceMapper& InputDeviceMapper,
+                                   DS5W::DeviceEnumInfo& DeviceInfo, const int32 ControllerId)
+{
+	UE_LOG(LogFabulousDualSense, Log, TEXT("New device found: %s, Connection: %s."),
+	       DeviceInfo._internal.path, DsUtility::DeviceConnectionToString(DeviceInfo._internal.connection).GetData());
+
+	const auto InitializeDeviceContextResult{initDeviceContext(&DeviceInfo, &DeviceContexts[ControllerId])};
+	if (DS5W_SUCCESS(InitializeDeviceContextResult))
+	{
+		UE_LOG(LogFabulousDualSense, Log, TEXT("Device connected: %s."), DeviceInfo._internal.path);
+
+		FMemory::Memzero(InputStates[ControllerId]);
+		FMemory::Memzero(OutputStates[ControllerId]);
+		FMemory::Memzero(ExtraStates[ControllerId]);
+
+		auto PlatformUserId{PLATFORMUSERID_NONE};
+		auto InputDeviceId{INPUTDEVICEID_NONE};
+		InputDeviceMapper.RemapControllerIdToPlatformUserAndDevice(ControllerId, PlatformUserId, InputDeviceId);
+
+		InputDeviceMapper.Internal_MapInputDeviceToUser(InputDeviceId, PlatformUserId, EInputDeviceConnectionState::Connected);
+	}
+	else
+	{
+		UE_LOG(LogFabulousDualSense, Warning, TEXT("Failed to initialize device context: %s, Device: %s."),
+		       DsUtility::ReturnValueToString(InitializeDeviceContextResult).GetData(), DeviceInfo._internal.path);
+
+		FMemory::Memzero(DeviceContexts[ControllerId]);
 	}
 }
 
@@ -343,7 +411,6 @@ void FDsInputDevice::DisconnectDevice(IPlatformInputDeviceMapper& InputDeviceMap
 	UE_LOG(LogFabulousDualSense, Log, TEXT("Device disconnected: %s."), Context._internal.devicePath);
 
 	freeDeviceContext(&Context);
-	Context._internal.uniqueID = 0;
 
 	if (FSlateApplication::Get().GetPlatformApplication().IsValid())
 	{

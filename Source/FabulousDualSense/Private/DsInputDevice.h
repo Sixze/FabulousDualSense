@@ -31,13 +31,13 @@ private:
 
 	float ButtonRepeatDelay{0.1f};
 
-	DS5W::DeviceContext DeviceContexts[DsConstants::MaxDevices]{};
+	DS5W::DeviceContext DeviceContexts[DsConstants::MaxDevicesCount]{};
 
-	DS5W::DS5InputState InputStates[DsConstants::MaxDevices]{};
+	DS5W::DS5InputState InputStates[DsConstants::MaxDevicesCount]{};
 
-	DS5W::DS5OutputState OutputStates[DsConstants::MaxDevices]{};
+	DS5W::DS5OutputState OutputStates[DsConstants::MaxDevicesCount]{};
 
-	FDsExtraState ExtraStates[DsConstants::MaxDevices]{};
+	FDsExtraState ExtraStates[DsConstants::MaxDevicesCount]{};
 
 public:
 	explicit FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler);
@@ -60,6 +60,8 @@ public:
 
 private:
 	void RefreshDevices();
+
+	void ConnectDevice(IPlatformInputDeviceMapper& InputDeviceMapper, DS5W::DeviceEnumInfo& DeviceInfo, int32 ControllerId);
 
 	void DisconnectDevice(IPlatformInputDeviceMapper& InputDeviceMapper, int32 ControllerId,
 	                      FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
