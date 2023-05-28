@@ -2,6 +2,23 @@
 
 #include <DualSenseWindows.h>
 
+const FName DsConstants::InputDeviceName{TEXTVIEW("DsInputDevice")};
+const FString DsConstants::HardwareDeviceIdentifier{TEXTVIEW("DualSense")};
+
+const FKey DsConstants::TouchpadKey{FName{TEXTVIEW("DsTouchpad")}};
+const FKey DsConstants::LogoKey{FName{TEXTVIEW("DsLogo")}};
+const FKey DsConstants::MuteKey{FName{TEXTVIEW("DsMute")}};
+
+const FKey DsConstants::Touch1Key{FName{TEXTVIEW("DsTouch1")}};
+const FKey DsConstants::Touch1AxisXKey{FName{TEXTVIEW("DsTouch1AxisX")}};
+const FKey DsConstants::Touch1AxisYKey{FName{TEXTVIEW("DsTouch1AxisY")}};
+const FKey DsConstants::Touch1AxisXYKey{FName{TEXTVIEW("DsTouch1AxisXY")}};
+
+const FKey DsConstants::Touch2Key{FName{TEXTVIEW("DsTouch2")}};
+const FKey DsConstants::Touch2AxisXKey{FName{TEXTVIEW("DsTouch2AxisX")}};
+const FKey DsConstants::Touch2AxisYKey{FName{TEXTVIEW("DsTouch2AxisY")}};
+const FKey DsConstants::Touch2AxisXYKey{FName{TEXTVIEW("DsTouch2AxisXY")}};
+
 const TMap<FGamepadKeyNames::Type, uint32>& DsConstants::GetRegularButtons()
 {
 	static const TMap<FGamepadKeyNames::Type, uint32> Buttons{

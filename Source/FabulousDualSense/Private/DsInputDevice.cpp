@@ -4,13 +4,12 @@
 #include "DsUtility.h"
 #include "Containers/StaticBitArray.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GameFramework/InputSettings.h"
 #include "GenericPlatform/IInputInterface.h"
 #include "Misc/ConfigCacheIni.h"
 
 FDsInputDevice::FDsInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler) : MessageHandler{MessageHandler}
 {
-	Settings = GetDefault<UDsSettings>();
-
 	GConfig->GetFloat(TEXT("/Script/Engine.InputSettings"), TEXT("InitialButtonRepeatDelay"), InitialButtonRepeatDelay, GInputIni);
 	GConfig->GetFloat(TEXT("/Script/Engine.InputSettings"), TEXT("ButtonRepeatDelay"), ButtonRepeatDelay, GInputIni);
 
@@ -160,10 +159,10 @@ void FDsInputDevice::SendControllerEvents()
 
 		if (PreviousInput.touchPoint1.down && Input.touchPoint1.down)
 		{
-			const auto TouchAxisX{static_cast<int32>(Input.touchPoint1.x) - static_cast<int32>(PreviousInput.touchPoint1.x)};
-			const auto TouchAxisY{static_cast<int32>(Input.touchPoint1.y) - static_cast<int32>(PreviousInput.touchPoint1.y)};
+			const auto TouchAxisX{static_cast<int32>(Input.touchPoint1.x - PreviousInput.touchPoint1.x)};
+			const auto TouchAxisY{static_cast<int32>(Input.touchPoint1.y - PreviousInput.touchPoint1.y)};
 
-			if (Settings->bEmitMouseEventsFromTouchpad)
+			if (GetDefault<UDsSettings>()->bEmitMouseEventsFromTouchpad)
 			{
 				MessageHandler->OnRawMouseMove(TouchAxisX, TouchAxisY);
 			}
@@ -221,12 +220,12 @@ void FDsInputDevice::SetChannelValue(const int32 ControllerId, const FForceFeedb
 			break;
 	}
 
-	const auto NewForceFeedbackLeft{FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall)};
-	const auto NewForceFeedbackRight{FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall)};
+	const auto NewForceFeedbackLeft{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall))};
+	const auto NewForceFeedbackRight{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall))};
 
 	auto& Output{OutputStates[ControllerId]};
 
-	Extra.bOutputChanged = Output.leftRumble != NewForceFeedbackLeft || Output.rightRumble != NewForceFeedbackRight;
+	Extra.bOutputChanged |= Output.leftRumble != NewForceFeedbackLeft || Output.rightRumble != NewForceFeedbackRight;
 
 	Output.leftRumble = NewForceFeedbackLeft;
 	Output.rightRumble = NewForceFeedbackRight;
@@ -246,15 +245,81 @@ void FDsInputDevice::SetChannelValues(const int32 ControllerId, const FForceFeed
 	Extra.ForceFeedbackRightLarge = static_cast<uint8>(Values.RightLarge * TNumericLimits<uint8>::Max());
 	Extra.ForceFeedbackRightSmall = static_cast<uint8>(Values.RightSmall * TNumericLimits<uint8>::Max());
 
-	const auto NewForceFeedbackLeft{FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall)};
-	const auto NewForceFeedbackRight{FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall)};
+	const auto NewForceFeedbackLeft{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall))};
+	const auto NewForceFeedbackRight{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall))};
 
 	auto& Output{OutputStates[ControllerId]};
 
-	Extra.bOutputChanged = Output.leftRumble != NewForceFeedbackLeft || Output.rightRumble != NewForceFeedbackRight;
+	Extra.bOutputChanged |= Output.leftRumble != NewForceFeedbackLeft || Output.rightRumble != NewForceFeedbackRight;
 
 	Output.leftRumble = NewForceFeedbackLeft;
 	Output.rightRumble = NewForceFeedbackRight;
+}
+
+void FDsInputDevice::SetDeviceProperty(const int32 ControllerId, const FInputDeviceProperty* Property)
+{
+	if (ControllerId < 0 || ControllerId >= DsConstants::MaxDevicesCount || !DeviceContexts[ControllerId]._internal.connected)
+	{
+		return;
+	}
+
+	auto& Output{OutputStates[ControllerId]};
+	auto& Extra{ExtraStates[ControllerId]};
+
+	if (Property->Name == FInputDeviceLightColorProperty::PropertyName())
+	{
+		const auto& LightColorProperty{static_cast<const FInputDeviceLightColorProperty&>(*Property)};
+
+		Extra.bOutputChanged |= ProcessLightColorProperty(Output, LightColorProperty);
+		return;
+	}
+
+	if (Property->Name == FInputDeviceTriggerResetProperty::PropertyName())
+	{
+		const auto& TriggerResetProperty{static_cast<const FInputDeviceTriggerResetProperty&>(*Property)};
+
+		Extra.bOutputChanged |= ProcessTriggerResetProperty(Output.leftTriggerEffect, TriggerResetProperty,
+		                                                    EInputDeviceTriggerMask::Left);
+
+		Extra.bOutputChanged |= ProcessTriggerResetProperty(Output.rightTriggerEffect, TriggerResetProperty,
+		                                                    EInputDeviceTriggerMask::Right);
+		return;
+	}
+
+	if (Property->Name == FInputDeviceTriggerFeedbackProperty::PropertyName())
+	{
+		const auto& TriggerFeedbackProperty{static_cast<const FInputDeviceTriggerFeedbackProperty&>(*Property)};
+
+		Extra.bOutputChanged |= ProcessTriggerFeedbackProperty(Output.leftTriggerEffect, TriggerFeedbackProperty,
+		                                                       EInputDeviceTriggerMask::Left);
+
+		Extra.bOutputChanged |= ProcessTriggerFeedbackProperty(Output.rightTriggerEffect, TriggerFeedbackProperty,
+		                                                       EInputDeviceTriggerMask::Right);
+		return;
+	}
+
+	if (Property->Name == FInputDeviceTriggerResistanceProperty::PropertyName())
+	{
+		const auto& TriggerResistanceProperty{static_cast<const FInputDeviceTriggerResistanceProperty&>(*Property)};
+
+		Extra.bOutputChanged |= ProcessTriggerResistanceProperty(Output.leftTriggerEffect, TriggerResistanceProperty,
+		                                                         EInputDeviceTriggerMask::Left);
+
+		Extra.bOutputChanged |= ProcessTriggerResistanceProperty(Output.rightTriggerEffect, TriggerResistanceProperty,
+		                                                         EInputDeviceTriggerMask::Right);
+		return;
+	}
+
+	if (Property->Name == FInputDeviceTriggerVibrationProperty::PropertyName())
+	{
+		const auto& TriggerVibrationProperty{static_cast<const FInputDeviceTriggerVibrationProperty&>(*Property)};
+
+		Extra.bOutputChanged |= ProcessTriggerVibrationProperty(Output.leftTriggerEffect, TriggerVibrationProperty,
+		                                                        EInputDeviceTriggerMask::Left);
+
+		Extra.bOutputChanged |= ProcessTriggerVibrationProperty(Output.rightTriggerEffect, TriggerVibrationProperty,
+		                                                        EInputDeviceTriggerMask::Right);
+	}
 }
 
 bool FDsInputDevice::IsGamepadAttached() const
@@ -515,19 +580,19 @@ void FDsInputDevice::ProcessTouch(const FPlatformUserId PlatformUserId, const FI
 		return;
 	}
 
-	const auto TouchAxisX{static_cast<int32>(NewTouch.x) - static_cast<int32>(PreviousTouch.x)};
+	const auto TouchAxisX{static_cast<int32>(NewTouch.x - PreviousTouch.x)};
 	if (TouchAxisX != 0)
 	{
 		MessageHandler->OnControllerAnalog(AxisXKeyName, PlatformUserId, InputDeviceId, TouchAxisX);
 	}
 
-	const auto TouchAxisY{static_cast<int32>(NewTouch.y) - static_cast<int32>(PreviousTouch.y)};
+	const auto TouchAxisY{static_cast<int32>(NewTouch.y - PreviousTouch.y)};
 	if (TouchAxisY != 0)
 	{
 		MessageHandler->OnControllerAnalog(AxisYKeyName, PlatformUserId, InputDeviceId, TouchAxisY);
 	}
 
-	if (Settings->bEmitMouseEventsFromTouchpad)
+	if (GetDefault<UDsSettings>()->bEmitMouseEventsFromTouchpad)
 	{
 		MessageHandler->OnRawMouseMove(TouchAxisX, TouchAxisY);
 	}
@@ -549,4 +614,147 @@ void FDsInputDevice::ReleaseButton(const FPlatformUserId PlatformUserId, const F
 	{
 		MessageHandler->OnControllerButtonReleased(KeyName, PlatformUserId, InputDeviceId, false);
 	}
+}
+
+bool FDsInputDevice::ProcessLightColorProperty(DS5W::DS5OutputState& Output, const FInputDeviceLightColorProperty& ColorProperty)
+{
+	const auto PreviousColor{Output.lightbar};
+
+	if (ColorProperty.bEnable)
+	{
+		Output.lightbar.r = static_cast<unsigned char>(ColorProperty.Color.R);
+		Output.lightbar.g = static_cast<unsigned char>(ColorProperty.Color.G);
+		Output.lightbar.b = static_cast<unsigned char>(ColorProperty.Color.B);
+	}
+	else
+	{
+		Output.lightbar = {};
+	}
+
+	return Output.lightbar.r != PreviousColor.r || Output.lightbar.g != PreviousColor.g || Output.lightbar.b != PreviousColor.b;
+}
+
+bool FDsInputDevice::ProcessTriggerResetProperty(DS5W::TriggerEffect& TriggerEffect,
+                                                 const FInputDeviceTriggerResetProperty& TriggerProperty,
+                                                 const EInputDeviceTriggerMask TriggerMask)
+{
+	if (!EnumHasAnyFlags(TriggerProperty.AffectedTriggers, TriggerMask))
+	{
+		return false;
+	}
+
+	TriggerEffect.effectType = DS5W::TriggerEffectType::ReleaseAll;
+	return true;
+}
+
+bool FDsInputDevice::ProcessTriggerFeedbackProperty(DS5W::TriggerEffect& TriggerEffect,
+                                                    const FInputDeviceTriggerFeedbackProperty& TriggerProperty,
+                                                    const EInputDeviceTriggerMask TriggerMask)
+{
+	if (!EnumHasAnyFlags(TriggerProperty.AffectedTriggers, TriggerMask))
+	{
+		return false;
+	}
+
+	const auto PreviousEffectType{TriggerEffect.effectType};
+	const auto PreviousPosition{TriggerEffect.Continuous.startPosition};
+	const auto PreviousForce{TriggerEffect.Continuous.force};
+
+	TriggerEffect.effectType = DS5W::TriggerEffectType::ContinuousResitance;
+
+	const auto* InputSettings{UInputPlatformSettings::Get()};
+
+	const auto MaxPosition{static_cast<float>(InputSettings->MaxTriggerFeedbackPosition)};
+
+	TriggerEffect.Continuous.startPosition =
+		MaxPosition > 0.0f
+			? static_cast<unsigned char>(TriggerProperty.Position / MaxPosition * TNumericLimits<unsigned char>::Max())
+			: 0;
+
+	const auto MaxStrength{static_cast<float>(InputSettings->MaxTriggerFeedbackStrength)};
+
+	TriggerEffect.Continuous.force =
+		MaxStrength > 0.0f
+			? static_cast<unsigned char>(TriggerProperty.Strengh / MaxStrength * TNumericLimits<unsigned char>::Max())
+			: 0;
+
+	return TriggerEffect.effectType != PreviousEffectType ||
+	       TriggerEffect.Continuous.startPosition != PreviousPosition ||
+	       TriggerEffect.Continuous.force != PreviousForce;
+}
+
+bool FDsInputDevice::ProcessTriggerResistanceProperty(DS5W::TriggerEffect& TriggerEffect,
+                                                      const FInputDeviceTriggerResistanceProperty& TriggerProperty,
+                                                      const EInputDeviceTriggerMask TriggerMask)
+{
+	if (!EnumHasAnyFlags(TriggerProperty.AffectedTriggers, TriggerMask))
+	{
+		return false;
+	}
+
+	// Partially supported. FInputDeviceTriggerResistanceProperty::StartStrength
+	// and FInputDeviceTriggerResistanceProperty::EndStrength are ignored.
+
+	const auto PreviousEffectType{TriggerEffect.effectType};
+	const auto PreviousStartPosition{TriggerEffect.Section.startPosition};
+	const auto PreviousEndPosition{TriggerEffect.Section.endPosition};
+
+	TriggerEffect.effectType = DS5W::TriggerEffectType::SectionResitance;
+
+	static constexpr auto MaxPositionInverse{1.0f / 9.0f};
+
+	TriggerEffect.Section.startPosition = static_cast<unsigned char>(
+		TriggerProperty.StartPosition * MaxPositionInverse * TNumericLimits<unsigned char>::Max());
+
+	TriggerEffect.Section.endPosition = static_cast<unsigned char>(
+		TriggerProperty.EndPosition * MaxPositionInverse * TNumericLimits<unsigned char>::Max());
+
+	return TriggerEffect.effectType != PreviousEffectType ||
+	       TriggerEffect.Section.startPosition != PreviousStartPosition ||
+	       TriggerEffect.Section.endPosition != PreviousEndPosition;
+}
+
+bool FDsInputDevice::ProcessTriggerVibrationProperty(DS5W::TriggerEffect& TriggerEffect,
+                                                     const FInputDeviceTriggerVibrationProperty& TriggerProperty,
+                                                     const EInputDeviceTriggerMask TriggerMask)
+{
+	if (!EnumHasAnyFlags(TriggerProperty.AffectedTriggers, TriggerMask))
+	{
+		return false;
+	}
+
+	// Not supported. At the moment, it is not possible to make this work as expected.
+
+	// const auto PreviousEffectType{TriggerEffect.effectType};
+	// const auto PreviousPosition{TriggerEffect.EffectEx.startPosition};
+	// const auto PreviousFrequency{TriggerEffect.EffectEx.frequency};
+	//
+	// TriggerEffect.effectType = DS5W::TriggerEffectType::EffectEx;
+	//
+	// const auto* InputSettings{UInputPlatformSettings::Get()};
+	//
+	// const auto MaxPosition{static_cast<float>(InputSettings->MaxTriggerVibrationTriggerPosition)};
+	//
+	// TriggerEffect.EffectEx.startPosition =
+	// 	MaxPosition > 0.0f
+	// 		? static_cast<unsigned char>(TriggerProperty.TriggerPosition / MaxPosition * TNumericLimits<unsigned char>::Max())
+	// 		: 0;
+	//
+	// TriggerEffect.EffectEx.keepEffect = true;
+	// TriggerEffect.EffectEx.beginForce = 0;
+	// TriggerEffect.EffectEx.middleForce = 0;
+	// TriggerEffect.EffectEx.endForce = 0;
+	//
+	// const auto MaxFrequency{static_cast<float>(InputSettings->MaxTriggerVibrationFrequency)};
+	//
+	// TriggerEffect.EffectEx.frequency =
+	// 	MaxFrequency > 0.0f
+	// 		? static_cast<unsigned char>(TriggerProperty.VibrationFrequency / MaxFrequency * TNumericLimits<unsigned char>::Max())
+	// 		: 0;
+	//
+	// return TriggerEffect.effectType != PreviousEffectType ||
+	//        TriggerEffect.EffectEx.startPosition != PreviousPosition ||
+	//        TriggerEffect.EffectEx.frequency != PreviousFrequency;
+
+	return false;
 }

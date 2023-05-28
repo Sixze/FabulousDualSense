@@ -5,7 +5,12 @@
 #include "DsConstants.h"
 #include "IInputDevice.h"
 
-class UDsSettings;
+enum class EInputDeviceTriggerMask : uint8;
+struct FInputDeviceLightColorProperty;
+struct FInputDeviceTriggerResetProperty;
+struct FInputDeviceTriggerFeedbackProperty;
+struct FInputDeviceTriggerResistanceProperty;
+struct FInputDeviceTriggerVibrationProperty;
 
 struct FABULOUSDUALSENSE_API FDsExtraState
 {
@@ -24,8 +29,6 @@ class FABULOUSDUALSENSE_API FDsInputDevice : public IInputDevice
 {
 private:
 	TSharedPtr<FGenericApplicationMessageHandler> MessageHandler;
-
-	TWeakObjectPtr<const UDsSettings> Settings;
 
 	float InitialButtonRepeatDelay{0.2f};
 
@@ -56,6 +59,8 @@ public:
 
 	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues& Values) override;
 
+	virtual void SetDeviceProperty(int32 ControllerId, const FInputDeviceProperty* Property) override;
+
 	virtual bool IsGamepadAttached() const override;
 
 private:
@@ -80,4 +85,22 @@ private:
 
 	void ReleaseButton(FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId,
 	                   const FGamepadKeyNames::Type& KeyName, bool bPressed) const;
+
+	static bool ProcessLightColorProperty(DS5W::DS5OutputState& Output, const FInputDeviceLightColorProperty& ColorProperty);
+
+	static bool ProcessTriggerResetProperty(DS5W::TriggerEffect& TriggerEffect,
+	                                        const FInputDeviceTriggerResetProperty& TriggerProperty,
+	                                        EInputDeviceTriggerMask TriggerMask);
+
+	static bool ProcessTriggerFeedbackProperty(DS5W::TriggerEffect& TriggerEffect,
+	                                           const FInputDeviceTriggerFeedbackProperty& TriggerProperty,
+	                                           EInputDeviceTriggerMask TriggerMask);
+
+	static bool ProcessTriggerResistanceProperty(DS5W::TriggerEffect& TriggerEffect,
+	                                             const FInputDeviceTriggerResistanceProperty& TriggerProperty,
+	                                             EInputDeviceTriggerMask TriggerMask);
+
+	static bool ProcessTriggerVibrationProperty(DS5W::TriggerEffect& TriggerEffect,
+	                                            const FInputDeviceTriggerVibrationProperty& TriggerProperty,
+	                                            EInputDeviceTriggerMask TriggerMask);
 };

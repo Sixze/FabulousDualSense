@@ -10,3 +10,7 @@
 #include <IO.h>
 
 #include "Windows/PostWindowsApi.h"
+
+#ifdef max
+#undef max
+#endif
