@@ -6,19 +6,16 @@ public class DualSenseWindows : ModuleRules
 	public DualSenseWindows(ReadOnlyTargetRules Target) : base(Target)
 	{
 		Type = ModuleType.External;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_2;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 
 		bEnableNonInlinedGenCppWarnings = true;
 
-		if (Target.Platform == UnrealTargetPlatform.Win64)
-		{
-			PublicDefinitions.Add("DS5W_USE_LIB");
+		PublicDefinitions.Add("DS5W_USE_LIB");
 
-			PublicSystemIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
+		PublicSystemIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
 
-			PublicSystemLibraries.Add("hid.lib");
+		PublicSystemLibraries.Add("hid.lib");
 
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "lib", "ds5w_x64.lib"));
-		}
+		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "lib", "ds5w_x64.lib"));
 	}
 }
