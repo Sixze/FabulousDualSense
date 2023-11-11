@@ -27,5 +27,10 @@ namespace DsConstants
 	FABULOUSDUALSENSE_API extern const FKey Touch2AxisYKey;
 	FABULOUSDUALSENSE_API extern const FKey Touch2AxisXYKey;
 
+	FABULOUSDUALSENSE_API extern const FKey GyroscopeAxisRollKey;
+	FABULOUSDUALSENSE_API extern const FKey GyroscopeAxisPitchKey;
+	FABULOUSDUALSENSE_API extern const FKey GyroscopeAxisYawKey;
+	FABULOUSDUALSENSE_API extern const FKey GyroscopeAxisYawPitchKey;
+
 	FABULOUSDUALSENSE_API const TMap<FGamepadKeyNames::Type, uint32>& GetRegularButtons();
 }

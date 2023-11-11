@@ -95,6 +95,29 @@ void FDsInputDevice::SendControllerEvents()
 			                                   Input.rightTrigger / static_cast<float>(TNumericLimits<uint8>::Max()));
 		}
 
+		// Gyroscope.
+
+		// Gyroscope X represents Unreal Engine's pitch axis
+		if (PreviousInput.gyroscope.x != Input.gyroscope.x)
+		{
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisPitchKey.GetFName(), PlatformUserId, InputDeviceId,
+				Input.gyroscope.x * 0.0001);
+		}
+
+		// Gyroscope Y represents Unreal Engine's yaw axis
+		if (PreviousInput.gyroscope.y != Input.gyroscope.y)
+		{
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisYawKey.GetFName(), PlatformUserId, InputDeviceId,
+				Input.gyroscope.y * 0.0001);
+		}
+
+		// Gyroscope Z represents Unreal Engine's roll axis
+		if (PreviousInput.gyroscope.z != Input.gyroscope.z)
+		{
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisRollKey.GetFName(), PlatformUserId, InputDeviceId,
+				Input.gyroscope.z * 0.0001);
+		}
+
 		// Regular buttons.
 
 		auto ButtonIndex{0};
