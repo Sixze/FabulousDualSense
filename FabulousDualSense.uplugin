@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Fabulous DualSense",
-	"Description": "Minimal input device plugin for DualSense controller in Windows.",
+	"Description": "Input device plugin for the DualSense controller on Windows.",
 	"Category": "Input Devices",
 	"CreatedBy": "Sixze",
 	"CreatedByURL": "https://github.com/Sixze",
