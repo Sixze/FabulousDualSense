@@ -61,28 +61,29 @@ void FFabulousDualSenseModule::StartupModule()
 		                    FKeyDetails::GamepadKey | FKeyDetails::Touch | FKeyDetails::Axis2D | FKeyDetails::UpdateAxisWithoutSamples,
 		                    CategoryName
 	                    }, DsConstants::Touch2AxisXKey, DsConstants::Touch2AxisYKey);
-	
+
 	// Gyroscope.
-	
+
 	EKeys::AddKey({
 		DsConstants::GyroscopeAxisRollKey, LOCTEXT("GyroscopeAxisRollKey", "DualSense Gyroscope Roll Axis"),
 		FKeyDetails::GamepadKey | FKeyDetails::Axis1D | FKeyDetails::UpdateAxisWithoutSamples, CategoryName
 	});
-	
+
 	EKeys::AddKey({
 		DsConstants::GyroscopeAxisPitchKey, LOCTEXT("GyroscopeAxisPitchKey", "DualSense Gyroscope Pitch Axis"),
 		FKeyDetails::GamepadKey | FKeyDetails::Axis1D | FKeyDetails::UpdateAxisWithoutSamples, CategoryName
 	});
-	
+
 	EKeys::AddKey({
 		DsConstants::GyroscopeAxisYawKey, LOCTEXT("GyroscopeAxisYawKey", "DualSense Gyroscope Yaw Axis"),
 		FKeyDetails::GamepadKey | FKeyDetails::Axis1D | FKeyDetails::UpdateAxisWithoutSamples, CategoryName
 	});
-	
+
 	EKeys::AddPairedKey({
-		DsConstants::GyroscopeAxisYawPitchKey, LOCTEXT("GyroscopeAxisYawPitchKey", "DualSense Gyroscope Yaw/Pitch Axis"),
-		FKeyDetails::GamepadKey | FKeyDetails::Axis2D | FKeyDetails::UpdateAxisWithoutSamples, CategoryName
-	}, DsConstants::GyroscopeAxisYawKey, DsConstants::GyroscopeAxisPitchKey);
+		                    DsConstants::GyroscopeAxisYawPitchKey,
+		                    LOCTEXT("GyroscopeAxisYawPitchKey", "DualSense Gyroscope Yaw/Pitch Axis"),
+		                    FKeyDetails::GamepadKey | FKeyDetails::Axis2D | FKeyDetails::UpdateAxisWithoutSamples, CategoryName
+	                    }, DsConstants::GyroscopeAxisYawKey, DsConstants::GyroscopeAxisPitchKey);
 }
 
 TSharedPtr<IInputDevice> FFabulousDualSenseModule::CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& MessageHandler)

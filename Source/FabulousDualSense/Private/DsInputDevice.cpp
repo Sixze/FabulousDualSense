@@ -97,25 +97,28 @@ void FDsInputDevice::SendControllerEvents()
 
 		// Gyroscope.
 
-		// Gyroscope X represents Unreal Engine's pitch axis
 		if (PreviousInput.gyroscope.x != Input.gyroscope.x)
 		{
-			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisPitchKey.GetFName(), PlatformUserId, InputDeviceId,
-				Input.gyroscope.x * 0.0001);
+			// Gyroscope X represents Unreal Engine's pitch axis.
+
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisPitchKey.GetFName(),
+			                                   PlatformUserId, InputDeviceId, Input.gyroscope.x * 0.0001f);
 		}
 
-		// Gyroscope Y represents Unreal Engine's yaw axis
 		if (PreviousInput.gyroscope.y != Input.gyroscope.y)
 		{
-			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisYawKey.GetFName(), PlatformUserId, InputDeviceId,
-				Input.gyroscope.y * 0.0001);
+			// Gyroscope Y represents Unreal Engine's yaw axis.
+
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisYawKey.GetFName(),
+			                                   PlatformUserId, InputDeviceId, Input.gyroscope.y * 0.0001f);
 		}
 
-		// Gyroscope Z represents Unreal Engine's roll axis
 		if (PreviousInput.gyroscope.z != Input.gyroscope.z)
 		{
-			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisRollKey.GetFName(), PlatformUserId, InputDeviceId,
-				Input.gyroscope.z * 0.0001);
+			// Gyroscope Z represents Unreal Engine's roll axis.
+
+			MessageHandler->OnControllerAnalog(DsConstants::GyroscopeAxisRollKey.GetFName(),
+			                                   PlatformUserId, InputDeviceId, Input.gyroscope.z * 0.0001f);
 		}
 
 		// Regular buttons.
@@ -243,8 +246,10 @@ void FDsInputDevice::SetChannelValue(const int32 ControllerId, const FForceFeedb
 			break;
 	}
 
+	// ReSharper disable CppRedundantCastExpression
 	const auto NewForceFeedbackLeft{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall))};
 	const auto NewForceFeedbackRight{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall))};
+	// ReSharper restore CppRedundantCastExpression
 
 	auto& Output{OutputStates[ControllerId]};
 
@@ -268,8 +273,10 @@ void FDsInputDevice::SetChannelValues(const int32 ControllerId, const FForceFeed
 	Extra.ForceFeedbackRightLarge = static_cast<uint8>(Values.RightLarge * TNumericLimits<uint8>::Max());
 	Extra.ForceFeedbackRightSmall = static_cast<uint8>(Values.RightSmall * TNumericLimits<uint8>::Max());
 
+	// ReSharper disable CppRedundantCastExpression
 	const auto NewForceFeedbackLeft{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackLeftLarge, Extra.ForceFeedbackLeftSmall))};
 	const auto NewForceFeedbackRight{static_cast<unsigned char>(FMath::Max(Extra.ForceFeedbackRightLarge, Extra.ForceFeedbackRightSmall))};
+	// ReSharper restore CppRedundantCastExpression
 
 	auto& Output{OutputStates[ControllerId]};
 

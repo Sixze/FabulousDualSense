@@ -19,10 +19,10 @@ const FKey DsConstants::Touch2AxisXKey{FName{TEXTVIEW("DsTouch2AxisX")}};
 const FKey DsConstants::Touch2AxisYKey{FName{TEXTVIEW("DsTouch2AxisY")}};
 const FKey DsConstants::Touch2AxisXYKey{FName{TEXTVIEW("DsTouch2AxisXY")}};
 
-const FKey DsConstants::GyroscopeAxisRollKey{ FName{TEXTVIEW("DsGyroscopeRoll")}};
-const FKey DsConstants::GyroscopeAxisPitchKey{ FName{TEXTVIEW("DsGyroscopePitch")}};
-const FKey DsConstants::GyroscopeAxisYawKey{ FName{TEXTVIEW("DsGyroscopeYaw")}};
-const FKey DsConstants::GyroscopeAxisYawPitchKey{ FName{TEXTVIEW("DsGyroscopeYawPitch")}};
+const FKey DsConstants::GyroscopeAxisRollKey{FName{TEXTVIEW("DsGyroscopeRoll")}};
+const FKey DsConstants::GyroscopeAxisPitchKey{FName{TEXTVIEW("DsGyroscopePitch")}};
+const FKey DsConstants::GyroscopeAxisYawKey{FName{TEXTVIEW("DsGyroscopeYaw")}};
+const FKey DsConstants::GyroscopeAxisYawPitchKey{FName{TEXTVIEW("DsGyroscopeYawPitch")}};
 
 const TMap<FGamepadKeyNames::Type, uint32>& DsConstants::GetRegularButtons()
 {
