@@ -22,7 +22,7 @@ struct FABULOUSDUALSENSE_API FDsExtraState
 	uint8 ForceFeedbackRightLarge{0};
 	uint8 ForceFeedbackRightSmall{0};
 
-	bool bOutputChanged{true};
+	uint8 bOutputChanged : 1 {true};
 };
 
 class FABULOUSDUALSENSE_API FDsInputDevice : public IInputDevice
