@@ -9,10 +9,14 @@ public class FabulousDualSense : ModuleRules
 
 		bEnableNonInlinedGenCppWarnings = true;
 
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core", "CoreUObject", "Engine", "DeveloperSettings"
+		});
+
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "ApplicationCore", "InputCore",
-			"InputDevice", "SlateCore", "Slate", "DeveloperSettings", "DualSenseWindows"
+			"ApplicationCore", "InputCore", "InputDevice", "SlateCore", "Slate", "DualSenseWindows"
 		});
 	}
 }
