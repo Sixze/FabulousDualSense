@@ -10,7 +10,7 @@ class FABULOUSDUALSENSE_API UDsSettings : public UDeveloperSettings
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DualSense", Config)
-	uint8 bEmitMouseEventsFromTouchpad : 1;
+	uint8 bEmitMouseEventsFromTouchpad : 1 {false};
 
 public:
 	UDsSettings();
