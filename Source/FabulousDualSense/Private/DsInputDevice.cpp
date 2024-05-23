@@ -613,13 +613,13 @@ void FDsInputDevice::ProcessTouch(const FPlatformUserId PlatformUserId, const FI
 	const auto TouchAxisX{static_cast<int32>(NewTouch.x - PreviousTouch.x)};
 	if (TouchAxisX != 0)
 	{
-		MessageHandler->OnControllerAnalog(AxisXKeyName, PlatformUserId, InputDeviceId, TouchAxisX);
+		MessageHandler->OnControllerAnalog(AxisXKeyName, PlatformUserId, InputDeviceId, static_cast<float>(TouchAxisX));
 	}
 
 	const auto TouchAxisY{static_cast<int32>(NewTouch.y - PreviousTouch.y)};
 	if (TouchAxisY != 0)
 	{
-		MessageHandler->OnControllerAnalog(AxisYKeyName, PlatformUserId, InputDeviceId, TouchAxisY);
+		MessageHandler->OnControllerAnalog(AxisYKeyName, PlatformUserId, InputDeviceId, static_cast<float>(TouchAxisY));
 	}
 
 	if (GetDefault<UDsSettings>()->bEmitMouseEventsFromTouchpad)

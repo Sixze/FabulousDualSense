@@ -9,6 +9,7 @@ public class DualSenseWindows : ModuleRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 
 		bEnableNonInlinedGenCppWarnings = true;
+		// UnsafeTypeCastWarningLevel = WarningLevel.Warning;
 
 		PublicDefinitions.Add("DS5W_USE_LIB");
 
