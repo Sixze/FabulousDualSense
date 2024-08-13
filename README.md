@@ -4,7 +4,7 @@ Input device plugin for the **DualSense** controller on **Windows** for **Unreal
 
 This plugin includes generic gamepad, touchpad, and gyroscope functionality, as well as partial support for the [Device Properties](https://docs.unrealengine.com/en-US/device-properties-in-unreal-engine/) feature (supported device properties are **Device Color**, **Trigger Feedback**, and **Trigger Resistance**).
 
-**This plugin is intended for use during development only.**
+**This plugin is intended for use during development only**. Consider using the **Windows DualShock** or **Game Input (Windows)** plugins instead in shipping builds.
 
 ## Quick Start
 
